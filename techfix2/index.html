@@ -318,3 +318,149 @@
                                 <span id="ticket-total">PHP 300.00</span>
                             </div>
                         </div>
+                                 <div class="border-t border-dashed border-slate-800 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+                            <div>
+                                <span class="text-xs text-slate-500 font-semibold block uppercase">Pickup & Verification Note</span>
+                                <p class="text-xs text-slate-400 mt-0.5">Please present this digital or printed ticket.</p>
+                            </div>
+                            <div class="bg-slate-950 px-4 py-2 border border-slate-800 rounded-xl flex flex-col items-center">
+                                <div id="ticket-barcode" class="font-mono text-xs tracking-[0.3em] font-bold text-slate-400">||| | |||| | ||| || |||</div>
+                                <span class="text-[9px] text-slate-600 font-mono mt-0.5">VERIFIED CAMPUS TICKET</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500 bg-slate-950">
+        <p>&copy; 2026 TechFix Student IT Solutions • College of Information Technology, Cebu Eastern College, Inc.</p>
+    </footer>
+
+    <script>
+        const firebaseConfig = {
+    apiKey: "AIzaSyEFYeK9BXB6Mn0Dg3g36_jbbSH9l0YhI",
+    authDomain: "techfix-b06a2.firebaseapp.com",
+    projectId: "techfix-b06a2",
+    storageBucket: "techfix-b06a2.firebasestorage.app",
+    messagingSenderId: "127582035538",
+    appId: "1:127582035538:web:6fc36d4a9404a14aa5c98b",
+    measurementId: "G-CHYG3K6WDS"
+};
+
+        let db = null;
+        try {
+            if (typeof firebase !== 'undefined') {
+                if (!firebase.apps.length) {
+                    firebase.initializeApp(firebaseConfig);
+                }
+                db = firebase.firestore();
+            }
+        } catch (e) {
+            console.warn("Firebase initialized in offline mode");
+        }
+
+        function switchTab(tabName) {
+            document.getElementById('tab-home').classList.add('hidden');
+            document.getElementById('tab-booking').classList.add('hidden');
+            document.getElementById('tab-ticket').classList.add('hidden');
+
+            document.getElementById('nav-home').className = "px-3 py-2 rounded-lg transition text-slate-400 hover:text-slate-200";
+            document.getElementById('nav-booking').className = "px-3 py-2 rounded-lg transition text-slate-400 hover:text-slate-200";
+            document.getElementById('nav-ticket').className = "px-3 py-2 rounded-lg transition text-slate-400 hover:text-slate-200 flex items-center gap-1.5";
+
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            const navBtn = document.getElementById(`nav-${tabName}`);
+            if (navBtn) {
+                navBtn.className = "px-3 py-2 rounded-lg transition text-blue-400 bg-slate-800 font-semibold";
+            }
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function selectServiceAndBook(cost, serviceName) {
+            switchTab('booking');
+            const serviceSelect = document.getElementById('service-select');
+            for (let i = 0; i < serviceSelect.options.length; i++) {
+                if (serviceSelect.options[i].value === cost) {
+                    serviceSelect.selectedIndex = i;
+                    break;
+                }
+            }
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const serviceSelect = document.getElementById('service-select');
+            const urgencySelect = document.getElementById('urgency-select');
+
+            const baseCost = parseFloat(serviceSelect.value) || 0;
+            const urgencyCost = parseFloat(urgencySelect.value) || 0;
+            const total = baseCost + urgencyCost;
+
+            document.getElementById('calc-base').innerText = `PHP ${baseCost.toFixed(2)}`;
+            document.getElementById('calc-urgency').innerText = `PHP ${urgencyCost.toFixed(2)}`;
+            document.getElementById('calc-price').innerText = `PHP ${total.toFixed(2)}`;
+
+            if (urgencyCost > 0) {
+                document.getElementById('calc-time').innerText = "Priority Emergency (1-2 Hours)";
+                document.getElementById('calc-time').className = "text-amber-400 font-semibold";
+            } else {
+                document.getElementById('calc-time').innerText = "Same Day (3-5 Hours)";
+                document.getElementById('calc-time').className = "text-blue-400 font-semibold";
+            }
+            return { baseCost, urgencyCost, total };
+        }
+
+        async function handleBookingSubmit(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('client-name').value.trim();
+            const course = document.getElementById('client-course').value.trim();
+            const contact = document.getElementById('client-contact').value.trim();
+            const errorBox = document.getElementById('form-error');
+
+            if (!name || !course || !contact) {
+                errorBox.innerText = "Please fill in all required fields.";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+            errorBox.classList.add('hidden');
+
+            const serviceSelect = document.getElementById('service-select');
+            const urgencySelect = document.getElementById('urgency-select');
+
+            const serviceOption = serviceSelect.options[serviceSelect.selectedIndex];
+            const urgencyOption = urgencySelect.options[urgencySelect.selectedIndex];
+
+            const serviceName = serviceOption.getAttribute('data-name') || serviceOption.text;
+            const urgencyName = urgencyOption.getAttribute('data-name') || urgencyOption.text;
+
+            const totals = calculateTotal();
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            const ticketId = `#TF-2026-${randomNum}`;
+            const timestampStr = new Date().toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' });
+
+            const bookingData = {
+                ticketId: ticketId,
+                clientName: name,
+                courseYear: course,
+                contactInfo: contact,
+                serviceName: serviceName,
+                serviceCost: totals.baseCost,
+                urgencyName: urgencyName,
+                urgencyFee: totals.urgencyCost,
+                totalPrice: totals.total,
+                status: "Pending Drop-off",
+                createdAt: new Date().toISOString()
+            };
+
+            let savedToFirebase = false;
+            if (db) {
+                try {
+                    await db.collection("bookings").add(bookingData);
+                    savedToFirebase = true;
+                } catch (e) {
+                    console.warn("Firestore save failed, generated locally:", e);
+                }
