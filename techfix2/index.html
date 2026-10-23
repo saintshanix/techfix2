@@ -212,3 +212,109 @@
                                     </div>
                                 </div>
                             </div>
+
+                            <div class="mt-6 pt-4 border-t border-slate-900">
+                                <div id="form-error" class="hidden text-xs text-red-400 bg-red-500/10 border border-red-500/20 p-3 rounded-lg text-center"></div>
+                                <p class="text-xs text-slate-500 text-center">
+                                    🔒 Direct submit saves ticket entry into Firebase Firestore and generates your Service Ticket immediately.
+                                </p>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <div id="tab-ticket" class="hidden py-10">
+            <section class="max-w-3xl mx-auto px-4">
+                
+                <div id="ticket-empty" class="bg-slate-900 border border-slate-800 rounded-3xl p-12 text-center my-8">
+                    <div class="w-16 h-16 bg-slate-800 text-slate-500 rounded-2xl flex items-center justify-center font-bold text-2xl mx-auto mb-4">🎫</div>
+                    <h3 class="text-xl font-bold mb-2">No Active Service Ticket Found</h3>
+                    <p class="text-slate-400 text-sm max-w-md mx-auto mb-6">
+                        You have not submitted a service booking yet. Fill out the booking form to receive your printable service ticket.
+                    </p>
+                    <button onclick="switchTab('booking')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold px-6 py-2.5 rounded-xl text-sm transition">
+                        Go to Booking Form
+                    </button>
+                </div>
+
+                <div id="ticket-active" class="hidden space-y-6">
+                    <div class="flex justify-between items-center bg-slate-900/80 border border-slate-800 p-4 rounded-2xl">
+                        <div>
+                            <span class="text-xs text-green-400 font-bold uppercase tracking-wider">✓ Booking Confirmed</span>
+                            <h3 class="text-base font-bold text-slate-100">Official TechFix Service Ticket</h3>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.print()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold px-4 py-2 rounded-xl transition border border-slate-700 flex items-center gap-1.5">
+                                <span>🖨️ Print Ticket</span>
+                            </button>
+                            <button onclick="switchTab('booking')" class="bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold px-4 py-2 rounded-xl transition">
+                                + New Booking
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="printable-ticket" class="bg-slate-900 border-2 border-slate-800 rounded-3xl p-8 shadow-2xl relative overflow-hidden">
+                        <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-green-500"></div>
+
+                        <div class="flex flex-col sm:flex-row justify-between sm:items-center border-b border-slate-800 pb-6 mb-6 gap-4">
+                            <div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-2xl font-black bg-gradient-to-r from-blue-400 to-green-400 bg-clip-text text-transparent">TechFix</span>
+                                    <span class="text-xs px-2 py-0.5 bg-blue-500/20 text-blue-400 rounded-full font-semibold border border-blue-500/30">CEC Campus IT</span>
+                                </div>
+                                <p class="text-xs text-slate-400 mt-1">Cebu Eastern College, Inc. IT Department</p>
+                            </div>
+                            <div class="sm:text-right">
+                                <span class="text-xs text-slate-500 uppercase tracking-widest font-semibold">Ticket Reference Number</span>
+                                <div id="ticket-id" class="text-xl font-mono font-bold text-blue-400">#TF-2026-0000</div>
+                                <span id="ticket-db-status" class="text-[10px] px-2 py-0.5 rounded bg-green-500/10 text-green-400 border border-green-500/20 inline-block mt-1">Database Sync: Saved</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-6 text-sm mb-6">
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Client Name</span>
+                                <span id="ticket-name" class="font-bold text-slate-200">Bernard Genobiagon</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Course / Department</span>
+                                <span id="ticket-course" class="font-bold text-slate-200">BSIT 2</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Contact Details</span>
+                                <span id="ticket-contact" class="font-bold text-slate-200">09123456789</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Selected Service</span>
+                                <span id="ticket-service-name" class="font-bold text-blue-400">Thermal Maintenance</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Urgency Schedule</span>
+                                <span id="ticket-urgency-name" class="font-bold text-slate-200">Standard Schedule</span>
+                            </div>
+                            <div>
+                                <span class="text-xs text-slate-500 block uppercase font-semibold">Date & Time</span>
+                                <span id="ticket-timestamp" class="font-bold text-slate-200">Oct 24, 2026</span>
+                            </div>
+                        </div>
+
+                        <div class="bg-slate-950 border border-slate-800/80 rounded-2xl p-5 mb-6">
+                            <div class="flex justify-between text-xs text-slate-400 mb-1">
+                                <span>Service Fee Breakdown</span>
+                                <span>Amount</span>
+                            </div>
+                            <div class="flex justify-between text-sm py-1 border-b border-slate-900">
+                                <span id="breakdown-service-label" class="text-slate-300">Base Service Fee</span>
+                                <span id="breakdown-service-cost" class="font-semibold text-slate-200">PHP 300.00</span>
+                            </div>
+                            <div class="flex justify-between text-sm py-1 border-b border-slate-900">
+                                <span id="breakdown-urgency-label" class="text-slate-300">Urgency Surcharge</span>
+                                <span id="breakdown-urgency-cost" class="font-semibold text-slate-200">PHP 0.00</span>
+                            </div>
+                            <div class="flex justify-between text-base font-bold pt-3 mt-1 text-green-400">
+                                <span>Total Investment</span>
+                                <span id="ticket-total">PHP 300.00</span>
+                            </div>
+                        </div>
